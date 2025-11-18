@@ -5,68 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>블로그</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
         <h1><a href="#">블로그</a></h1>
         <div id="auth-buttons">
-            <button id="login-btn">로그인</button>
-            <button id="register-btn">회원가입</button>
+            <button id="login-btn" class="fancy-button">로그인</button>
+            <button id="register-btn" class="fancy-button">회원가입</button>
         </div>
         <div id="user-info" style="display: none;">
             <span id="username-display"></span>님 환영합니다!
-            <button id="new-post-btn">새 글 작성</button>
-            <button id="logout-btn">로그아웃</button>
+            <button id="new-post-btn" class="fancy-button">새 글 작성</button>
+            <button id="logout-btn" class="fancy-button">로그아웃</button>
         </div>
     </header>
     <main id="app">
         <!-- 게시글 목록 -->
         <section id="post-list-container" class="view">
             <h2>게시글 목록</h2>
+            <div class="loader" id="post-list-loader"></div>
             <ul id="post-list"></ul>
         </section>
 
         <!-- 게시글 상세 -->
-        <section id="post-detail-container" class="view" style="display: none;">
+        <section id="post-detail-container" class="view">
+            <div class="loader" id="post-detail-loader"></div>
             <article id="post-detail"></article>
             <h3>댓글</h3>
             <ul id="comment-list"></ul>
             <form id="comment-form">
-                <input type="text" id="comment-author" placeholder="이름" required>
                 <textarea id="comment-content" placeholder="댓글 내용" required></textarea>
-                <button type="submit">댓글 작성</button>
+                <button type="submit" class="fancy-button">댓글 작성</button>
             </form>
         </section>
 
         <!-- 게시글 작성/수정 -->
-        <section id="post-form-container" class="view" style="display: none;">
+        <section id="post-form-container" class="view">
             <h2 id="form-title">새 글 작성</h2>
             <form id="post-form">
                 <input type="hidden" id="post-id">
                 <input type="text" id="post-title" placeholder="제목" required>
                 <textarea id="post-content" placeholder="내용" required></textarea>
-                <button type="submit">저장</button>
-                <button type="button" id="cancel-btn">취소</button>
+                <button type="submit" class="fancy-button">저장</button>
+                <button type="button" id="cancel-btn" class="fancy-button">취소</button>
             </form>
         </section>
 
         <!-- 로그인 -->
-        <section id="login-container" class="view" style="display: none;">
+        <section id="login-container" class="view">
             <h2>로그인</h2>
             <form id="login-form">
                 <input type="text" id="login-username" placeholder="사용자 이름" required>
                 <input type="password" id="login-password" placeholder="비밀번호" required>
-                <button type="submit">로그인</button>
+                <button type="submit" class="fancy-button">로그인</button>
             </form>
         </section>
 
         <!-- 회원가입 -->
-        <section id="register-container" class="view" style="display: none;">
+        <section id="register-container" class="view">
             <h2>회원가입</h2>
             <form id="register-form">
                 <input type="text" id="register-username" placeholder="사용자 이름" required>
                 <input type="password" id="register-password" placeholder="비밀번호" required>
-                <button type="submit">회원가입</button>
+                <button type="submit" class="fancy-button">회원가입</button>
             </form>
         </section>
     </main>

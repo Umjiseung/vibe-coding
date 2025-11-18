@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const hideAllViews = () => {
-        views.forEach(view => view.style.display = 'none');
+        views.forEach(view => view.classList.remove('active'));
     };
 
 
@@ -67,56 +67,72 @@ document.addEventListener('DOMContentLoaded', () => {
         hideAllViews();
 
         if (path === 'post' && id) {
+            postDetailContainer.classList.add('active');
             renderPostDetail(parseInt(id, 10));
-            postDetailContainer.style.display = 'block';
         } else if (path === 'new-post' && currentUser) {
+            postFormContainer.classList.add('active');
             renderPostForm();
-            postFormContainer.style.display = 'block';
         } else if (path === 'edit-post' && id && currentUser) {
+            postFormContainer.classList.add('active');
             renderPostForm(parseInt(id, 10));
-            postFormContainer.style.display = 'block';
         } else if (path === 'login') {
-            loginContainer.style.display = 'block';
+            loginContainer.classList.add('active');
         } else if (path === 'register') {
-            registerContainer.style.display = 'block';
+            registerContainer.classList.add('active');
         } else {
             window.location.hash = '';
+            postListContainer.classList.add('active');
             renderPostList();
-            postListContainer.style.display = 'block';
         }
     };
 
 
     // --- Render Functions ---
     const renderPostList = () => {
+        const loader = document.getElementById('post-list-loader');
         postList.innerHTML = '';
-        posts.forEach(post => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <h3>${post.title}</h3>
-                <p>by ${post.author} on ${post.date}</p>
-            `;
-            li.addEventListener('click', () => {
-                window.location.hash = `#post/${post.id}`;
+        loader.style.display = 'block';
+
+        // Simulate network delay
+        setTimeout(() => {
+            posts.forEach(post => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <h3>${post.title}</h3>
+                    <p>by ${post.author} on ${post.date}</p>
+                `;
+                li.addEventListener('click', () => {
+                    window.location.hash = `#post/${post.id}`;
+                });
+                postList.appendChild(li);
             });
-            postList.appendChild(li);
-        });
+            loader.style.display = 'none';
+        }, 500);
     };
 
     const renderPostDetail = (id) => {
-        const post = posts.find(p => p.id === id);
-        if (!post) {
-            window.location.hash = '#';
-            return;
-        }
+        const loader = document.getElementById('post-detail-loader');
+        postDetail.innerHTML = '';
+        commentList.innerHTML = '';
+        loader.style.display = 'block';
 
-        const currentUser = getCurrentUser();
-        const authorControls = currentUser === post.author ? `
-            <button id="edit-post-btn">수정</button>
-            <button id="delete-post-btn">삭제</button>
+        // Simulate network delay
+        setTimeout(() => {
+            const post = posts.find(p => p.id === id);
+            if (!post) {
+                window.location.hash = '#';
+                return;
+            }
+
+            const currentUser = getCurrentUser();
+            const authorControls = currentUser === post.author ? `
+            <div class="post-controls">
+                <button id="edit-post-btn" class="fancy-button">수정</button>
+                <button id="delete-post-btn" class="fancy-button">삭제</button>
+            </div>
         ` : '';
 
-        postDetail.innerHTML = `
+            postDetail.innerHTML = `
             <h2>${post.title}</h2>
             <div class="post-meta">
                 <span>by ${post.author}</span> | <span>${post.date}</span>
@@ -125,19 +141,21 @@ document.addEventListener('DOMContentLoaded', () => {
             ${authorControls}
         `;
 
-        if (currentUser === post.author) {
-            document.getElementById('edit-post-btn').addEventListener('click', () => {
-                window.location.hash = `#edit-post/${post.id}`;
-            });
-            document.getElementById('delete-post-btn').addEventListener('click', () => {
-                if (confirm('정말로 삭제하시겠습니까?')) {
-                    deletePost(post.id);
-                }
-            });
-        }
+            if (currentUser === post.author) {
+                document.getElementById('edit-post-btn').addEventListener('click', () => {
+                    window.location.hash = `#edit-post/${post.id}`;
+                });
+                document.getElementById('delete-post-btn').addEventListener('click', () => {
+                    if (confirm('정말로 삭제하시겠습니까?')) {
+                        deletePost(post.id);
+                    }
+                });
+            }
 
-        renderCommentList(post);
-        document.getElementById('comment-form').style.display = currentUser ? 'flex' : 'none';
+            renderCommentList(post);
+            document.getElementById('comment-form').style.display = currentUser ? 'flex' : 'none';
+            loader.style.display = 'none';
+        }, 500);
     };
 
     const renderCommentList = (post) => {
@@ -149,11 +167,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="comment-author">${comment.author}</div>
                 <div class="comment-content">${comment.content}</div>
                 <div class="reply-list"></div>
-                <button class="reply-btn">답글 달기</button>
+                <button class="reply-btn fancy-button">답글 달기</button>
                 <div class="reply-form-container" style="display: none;">
                     <form class="reply-form">
                         <textarea class="reply-content" placeholder="답글 내용" required></textarea>
-                        <button type="submit">답글 작성</button>
+                        <button type="submit" class="fancy-button">답글 작성</button>
                     </form>
                 </div>
             `;
