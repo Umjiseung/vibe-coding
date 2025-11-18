@@ -1,0 +1,21 @@
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local environment/config files
+.env
+.flaskenv
+
+# SQLite databases and Flask instance data
+*.db
+instance/
+backend/instance/
+
+# macOS metadata
+.DS_Store

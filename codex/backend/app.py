@@ -1,16 +1,30 @@
+import os
 from datetime import datetime
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 
+def str_to_bool(value, default=False):
+    if value is None:
+        return default
+    return str(value).strip().lower() in {'1', 'true', 't', 'yes', 'y', 'on'}
+
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JSON_AS_ASCII'] = False
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///blog.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = str_to_bool(os.environ.get('SQLALCHEMY_TRACK_MODIFICATIONS'), False)
+app.config['JSON_AS_ASCII'] = str_to_bool(os.environ.get('JSON_AS_ASCII'), False)
 
 db = SQLAlchemy(app)
-CORS(app)
+
+cors_origins = os.environ.get('CORS_ORIGINS')
+if cors_origins:
+    origins = [origin.strip() for origin in cors_origins.split(',') if origin.strip()]
+    CORS(app, resources={r"/api/*": {"origins": origins}})
+else:
+    CORS(app)
 
 
 class User(db.Model):
@@ -194,4 +208,7 @@ def create_comment(post_id):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    debug = str_to_bool(os.environ.get('FLASK_DEBUG') or os.environ.get('DEBUG'), False)
+    host = os.environ.get('FLASK_RUN_HOST') or os.environ.get('HOST', '127.0.0.1')
+    port = int(os.environ.get('FLASK_RUN_PORT') or os.environ.get('PORT', 5000))
+    app.run(host=host, port=port, debug=debug)
