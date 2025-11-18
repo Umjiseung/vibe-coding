@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>로그인 - 토스 감성 게시판</title>
+  <style>
+    :root {
+      font-family: 'Pretendard', 'Spoqa Han Sans Neo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #191f28;
+      background: #0f172a;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 10% 20%, rgba(79,143,251,0.35), transparent), #0f172a;
+      padding: 2rem 1rem;
+      color: #fff;
+    }
+    .card {
+      width: min(460px, 100%);
+      background: rgba(15, 23, 42, 0.85);
+      border-radius: 28px;
+      padding: 2.5rem;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    h1 { margin: 0; font-size: 2rem; }
+    p { margin: 0; color: rgba(255,255,255,0.7); }
+    form { display: flex; flex-direction: column; gap: 0.75rem; }
+    input {
+      font: inherit;
+      border-radius: 14px;
+      padding: 0.95rem 1rem;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(15, 23, 42, 0.6);
+      color: #fff;
+    }
+    input:focus {
+      outline: none;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
+      background: rgba(15, 23, 42, 0.9);
+    }
+    button {
+      font: inherit;
+      border: none;
+      border-radius: 14px;
+      padding: 0.95rem 1rem;
+      background: linear-gradient(135deg, #60a5fa, #2563eb);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 20px 30px rgba(37, 99, 235, 0.35);
+    }
+    a { color: #93c5fd; text-decoration: none; font-weight: 600; }
+    .links { display: flex; justify-content: space-between; align-items: center; }
+    #status { font-size: 0.95rem; border-radius: 12px; padding: 0.75rem 1rem; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+    #status.error { background: rgba(248,113,113,0.15); color: #fecaca; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="links">
+      <div>
+        <h1>로그인</h1>
+        <p>다시 오신 것을 환영해요.</p>
+      </div>
+      <a href="index.html">홈으로</a>
+    </div>
+    <form id="login-form">
+      <input name="username" placeholder="아이디" required />
+      <input type="password" name="password" placeholder="비밀번호" required />
+      <button type="submit">로그인</button>
+    </form>
+    <p>계정이 없으신가요? <a href="register.html">회원가입</a></p>
+    <p id="status"></p>
+  </div>
+
+  <script src="./js/auth.js"></script>
+  <script>
+    const apiBase = 'http://127.0.0.1:5000/api';
+    const statusEl = document.getElementById('status');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (authStorage.getUser()) {
+        setStatus('이미 로그인되어 있어요. 잠시 후 홈으로 이동합니다.');
+        setTimeout(() => (window.location.href = 'index.html'), 1200);
+        return;
+      }
+      document.getElementById('login-form').addEventListener('submit', loginUser);
+    });
+
+    function setStatus(message, type = 'info') {
+      statusEl.textContent = message;
+      statusEl.className = '';
+      if (type === 'error') statusEl.classList.add('error');
+    }
+
+    async function loginUser(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const payload = Object.fromEntries(formData.entries());
+      try {
+        const res = await fetch(`${apiBase}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || '로그인 실패');
+        authStorage.setUser(data.user);
+        setStatus('로그인 성공! 홈으로 이동합니다.');
+        setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+      } catch (err) {
+        setStatus(err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

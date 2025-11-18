@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>글 작성/수정 - 토스 감성 게시판</title>
+  <style>
+    :root {
+      font-family: 'Pretendard', 'Spoqa Han Sans Neo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #191f28;
+      background: #f8fafc;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 0% 0%, #e8f1ff 0%, transparent 45%), radial-gradient(circle at 100% 0%, #f8edff 0%, transparent 45%), #f9fafb;
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1rem 4rem;
+    }
+    .app-shell {
+      width: min(900px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    header.hero {
+      background: #0f172a;
+      color: #fff;
+      border-radius: 26px;
+      padding: clamp(1.8rem, 4vw, 3rem);
+      box-shadow: 0 30px 60px rgba(15, 23, 42, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .hero-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+    .hero-actions a { text-decoration: none; }
+    .hero-actions button {
+      font: inherit;
+      border: none;
+      border-radius: 999px;
+      padding: 0.75rem 1.2rem;
+      cursor: pointer;
+      background: linear-gradient(135deg, #4f8ffb, #3182f6);
+      color: #fff;
+      font-weight: 600;
+    }
+    .hero-actions button.secondary {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+    form {
+      background: #fff;
+      border-radius: 24px;
+      padding: 1.75rem;
+      box-shadow: 0 25px 55px rgba(15, 23, 42, 0.08);
+      border: 1px solid #e4ecfb;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    input, textarea {
+      font: inherit;
+      padding: 0.9rem 1rem;
+      border-radius: 14px;
+      border: 1px solid #d8dee7;
+      background: #f8fafc;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #3182f6;
+      box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.15);
+      background: #fff;
+    }
+    textarea { min-height: 220px; resize: vertical; }
+    .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .actions button {
+      font: inherit;
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 1.1rem;
+      cursor: pointer;
+    }
+    .primary { background: linear-gradient(135deg, #4f8ffb, #3182f6); color: #fff; }
+    .secondary { background: #e5e8ef; color: #475064; }
+    #status { position: sticky; top: 15px; align-self: flex-end; background: rgba(25,31,40,0.9); color: #fff; padding: 0.8rem 1.1rem; border-radius: 999px; box-shadow: 0 20px 30px rgba(15, 23, 42, 0.35); }
+    #status.hidden { display: none; }
+    #status.error { background: rgba(239, 68, 68, 0.95); }
+    #current-user { color: rgba(255,255,255,0.85); font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div id="status" class="hidden"></div>
+    <header class="hero">
+      <div class="hero-actions">
+        <a href="posts.html"><button>← 글 목록으로</button></a>
+        <a href="post.html?id=" id="detail-link" style="display:none;"><button class="secondary">상세 보기</button></a>
+      </div>
+      <h1 id="page-title">새 글 작성</h1>
+      <p class="sub" id="hero-desc"></p>
+      <p id="current-user">로그인되지 않았습니다.</p>
+    </header>
+
+    <form id="post-form">
+      <input name="title" placeholder="제목" required />
+      <textarea name="content" placeholder="내용" required></textarea>
+      <div class="actions">
+        <button type="submit" class="primary">저장하기</button>
+        <button type="button" class="secondary" id="reset">초기화</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="./js/auth.js"></script>
+  <script>
+    const apiBase = 'http://127.0.0.1:5000/api';
+    const params = new URLSearchParams(window.location.search);
+    const postId = params.get('id');
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      currentUser = authStorage.getUser();
+      updateUserState();
+      if (!currentUser) {
+        setStatus('로그인 후 이용해주세요.', true);
+      }
+      if (postId) {
+        document.getElementById('page-title').textContent = '글 수정';
+        document.getElementById('hero-desc').textContent = `글 ID ${postId} 수정 중입니다.`;
+        const detailLink = document.getElementById('detail-link');
+        detailLink.style.display = 'inline-block';
+        detailLink.href = `post.html?id=${postId}`;
+        fetchPost();
+      } else {
+        document.getElementById('hero-desc').textContent = '새로운 글을 작성해보세요.';
+      }
+      document.getElementById('post-form').addEventListener('submit', savePost);
+      document.getElementById('reset').addEventListener('click', () => document.getElementById('post-form').reset());
+      window.addEventListener('storage', () => {
+        currentUser = authStorage.getUser();
+        updateUserState();
+      });
+    });
+
+    async function fetchPost() {
+      try {
+        const res = await fetch(`${apiBase}/posts/${postId}`);
+        if (!res.ok) throw new Error('글 정보를 불러오지 못했습니다.');
+        const post = await res.json();
+        const form = document.getElementById('post-form');
+        form.title.value = post.title;
+        form.content.value = post.content;
+      } catch (err) {
+        setStatus(err.message, true);
+      }
+    }
+
+    async function savePost(event) {
+      event.preventDefault();
+      if (!currentUser) {
+        setStatus('로그인 후 이용해주세요.', true);
+        return;
+      }
+      const formData = new FormData(event.target);
+      const payload = Object.fromEntries(formData.entries());
+      payload.user_id = currentUser.id;
+      const method = postId ? 'PUT' : 'POST';
+      const url = postId ? `${apiBase}/posts/${postId}` : `${apiBase}/posts`;
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || '저장 실패');
+        setStatus('저장되었습니다! 잠시 후 상세 페이지로 이동합니다.');
+        const targetId = postId || data.post.id;
+        setTimeout(() => { window.location.href = `post.html?id=${targetId}`; }, 1200);
+      } catch (err) {
+        setStatus(err.message, true);
+      }
+    }
+
+    function updateUserState() {
+      const el = document.getElementById('current-user');
+      el.textContent = currentUser ? `${currentUser.username}님으로 로그인되었습니다.` : '로그인되지 않았습니다.';
+    }
+
+    function setStatus(message, isError = false) {
+      const el = document.getElementById('status');
+      el.textContent = message || '';
+      el.classList.toggle('hidden', !message);
+      el.classList.toggle('error', isError);
+    }
+  </script>
+</body>
+</html>

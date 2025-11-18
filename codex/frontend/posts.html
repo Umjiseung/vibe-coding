@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>글 목록 - 토스 감성 게시판</title>
+  <style>
+    :root {
+      font-family: 'Pretendard', 'Spoqa Han Sans Neo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #191f28;
+      background: #f8fafc;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 0% 0%, #e8f1ff 0%, transparent 45%), radial-gradient(circle at 100% 0%, #f8edff 0%, transparent 45%), #f9fafb;
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1rem 4rem;
+    }
+    .app-shell {
+      width: min(1100px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    header.hero {
+      background: #0f172a;
+      color: #fff;
+      border-radius: 26px;
+      padding: clamp(1.8rem, 4vw, 3rem);
+      box-shadow: 0 30px 60px rgba(15, 23, 42, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .hero-top {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    @media (min-width: 720px) {
+      .hero-top {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+    }
+    p.sub { margin: 0; color: rgba(255,255,255,0.75); }
+    .hero-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+    .hero-actions a { text-decoration: none; }
+    .hero-actions button {
+      font: inherit;
+      border: none;
+      border-radius: 999px;
+      padding: 0.7rem 1.3rem;
+      cursor: pointer;
+      background: linear-gradient(135deg, #4f8ffb, #3182f6);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 12px 22px rgba(49, 130, 246, 0.3);
+    }
+    .hero-actions button.secondary {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: none;
+    }
+    .status-toast {
+      position: sticky;
+      top: 10px;
+      align-self: flex-end;
+      padding: 0.8rem 1.2rem;
+      border-radius: 999px;
+      background: rgba(25, 31, 40, 0.9);
+      color: #fff;
+      font-size: 0.95rem;
+      box-shadow: 0 20px 30px rgba(15, 23, 42, 0.35);
+    }
+    .status-toast.hidden { display: none; }
+    .status-toast.error { background: rgba(239, 68, 68, 0.95); }
+    .posts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .post-card {
+      border-radius: 20px;
+      padding: 1.25rem;
+      background: #f8fbff;
+      border: 1px solid #e4ecfb;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      min-height: 180px;
+      transition: transform 0.2s ease, border 0.2s ease;
+    }
+    .post-card:hover {
+      border-color: #c0d8ff;
+      transform: translateY(-3px);
+    }
+    .post-card h3 { margin: 0; font-size: 1.1rem; }
+    .post-meta { color: #6b7280; font-size: 0.9rem; }
+    .post-card a {
+      margin-top: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: #2563eb;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    #current-user { color: rgba(255,255,255,0.85); font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div id="status" class="status-toast hidden"></div>
+    <header class="hero">
+      <div class="hero-top">
+        <div>
+          <h1>전체 글 목록</h1>
+          <p class="sub">작성된 모든 게시글을 확인하고 원하는 글을 선택해 상세 페이지로 이동하세요.</p>
+        </div>
+        <div class="hero-actions" id="hero-actions"></div>
+      </div>
+      <p id="current-user">로그인되지 않았습니다.</p>
+    </header>
+
+    <section>
+      <div class="posts" id="posts"></div>
+    </section>
+  </div>
+
+  <script src="./js/auth.js"></script>
+  <script>
+    const apiBase = 'http://127.0.0.1:5000/api';
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      currentUser = authStorage.getUser();
+      updateUserState();
+      renderHeroActions();
+      fetchPosts();
+      window.addEventListener('storage', handleStorage);
+    });
+
+    function handleStorage() {
+      currentUser = authStorage.getUser();
+      updateUserState();
+      renderHeroActions();
+    }
+
+    function updateUserState() {
+      const text = currentUser ? `${currentUser.username}님으로 로그인되었습니다.` : '로그인되지 않았습니다.';
+      document.getElementById('current-user').textContent = text;
+    }
+
+    function renderHeroActions() {
+      const container = document.getElementById('hero-actions');
+      container.innerHTML = '';
+      const toEditor = document.createElement('a');
+      toEditor.href = 'editor.html';
+      const editorBtn = document.createElement('button');
+      editorBtn.textContent = '새 글 작성';
+      toEditor.appendChild(editorBtn);
+      container.appendChild(toEditor);
+
+      if (currentUser) {
+        const logoutBtn = document.createElement('button');
+        logoutBtn.textContent = '로그아웃';
+        logoutBtn.classList.add('secondary');
+        logoutBtn.onclick = () => {
+          authStorage.clear();
+          currentUser = null;
+          updateUserState();
+          renderHeroActions();
+          setStatus('로그아웃되었습니다.');
+        };
+        container.appendChild(logoutBtn);
+      } else {
+        const loginLink = document.createElement('a');
+        loginLink.href = 'login.html';
+        const loginBtn = document.createElement('button');
+        loginBtn.textContent = '로그인';
+        loginBtn.classList.add('secondary');
+        loginLink.appendChild(loginBtn);
+
+        const registerLink = document.createElement('a');
+        registerLink.href = 'register.html';
+        const registerBtn = document.createElement('button');
+        registerBtn.textContent = '회원가입';
+        registerBtn.classList.add('secondary');
+        registerLink.appendChild(registerBtn);
+
+        container.appendChild(loginLink);
+        container.appendChild(registerLink);
+      }
+    }
+
+    async function fetchPosts() {
+      try {
+        const res = await fetch(`${apiBase}/posts`);
+        const data = await res.json();
+        renderPosts(data);
+      } catch (err) {
+        setStatus('글 목록을 불러오지 못했습니다.', true);
+      }
+    }
+
+    function renderPosts(posts) {
+      const container = document.getElementById('posts');
+      container.innerHTML = '';
+      if (!posts.length) {
+        container.innerHTML = '<p>작성된 글이 없습니다.</p>';
+        return;
+      }
+      posts.forEach(post => {
+        const card = document.createElement('article');
+        card.className = 'post-card';
+        card.innerHTML = `
+          <h3>${post.title}</h3>
+          <p class="post-meta">${post.author || '알 수 없음'} · ${new Date(post.created_at).toLocaleString()}</p>
+          <p class="post-meta">${post.content.slice(0, 80)}${post.content.length > 80 ? '…' : ''}</p>
+          <a href="post.html?id=${post.id}">글 상세보기 →</a>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function setStatus(message, isError = false) {
+      const el = document.getElementById('status');
+      el.textContent = message || '';
+      el.classList.toggle('hidden', !message);
+      el.classList.toggle('error', isError);
+    }
+  </script>
+</body>
+</html>

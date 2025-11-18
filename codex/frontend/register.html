@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>회원가입 - 토스 감성 게시판</title>
+  <style>
+    :root {
+      font-family: 'Pretendard', 'Spoqa Han Sans Neo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #191f28;
+      background: #eef2ff;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #eef2ff, #fdf2ff);
+      padding: 2rem 1rem;
+    }
+    .card {
+      width: min(480px, 100%);
+      background: #fff;
+      border-radius: 28px;
+      padding: 2rem;
+      box-shadow: 0 30px 70px rgba(15, 23, 42, 0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: #0f172a;
+    }
+    p { margin: 0; color: #6b7280; }
+    form { display: flex; flex-direction: column; gap: 0.75rem; }
+    input {
+      font: inherit;
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      border: 1px solid #d8dee7;
+      background: #f8fafc;
+    }
+    input:focus {
+      outline: none;
+      border-color: #3182f6;
+      box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.15);
+      background: #fff;
+    }
+    button {
+      font: inherit;
+      border: none;
+      border-radius: 14px;
+      padding: 0.9rem 1rem;
+      background: linear-gradient(135deg, #4f8ffb, #3182f6);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      box-shadow: 0 15px 25px rgba(49, 130, 246, 0.3);
+    }
+    .muted { font-size: 0.9rem; color: #94a3b8; }
+    .links { display: flex; justify-content: space-between; align-items: center; }
+    a { color: #3182f6; text-decoration: none; font-weight: 600; }
+    #status { font-size: 0.95rem; border-radius: 12px; padding: 0.75rem 1rem; background: #f5f7fa; }
+    #status.error { background: #fee2e2; color: #b91c1c; }
+    #status.success { background: #dcfce7; color: #15803d; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div>
+      <div class="links">
+        <div>
+          <h1>회원가입</h1>
+          <p>간단하게 계정을 만들고 글을 작성해보세요.</p>
+        </div>
+        <a href="index.html">홈으로</a>
+      </div>
+    </div>
+    <form id="register-form">
+      <input name="username" placeholder="아이디" required />
+      <input type="password" name="password" placeholder="비밀번호" required />
+      <button type="submit">가입하기</button>
+    </form>
+    <p class="muted">이미 계정이 있으신가요? <a href="login.html">로그인</a></p>
+    <p id="status"></p>
+  </div>
+
+  <script src="./js/auth.js"></script>
+  <script>
+    const apiBase = 'http://127.0.0.1:5000/api';
+    const statusEl = document.getElementById('status');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (authStorage.getUser()) {
+        setStatus('이미 로그인되어 있습니다. 홈으로 이동할 수 있어요.', 'success');
+      }
+      document.getElementById('register-form').addEventListener('submit', registerUser);
+    });
+
+    function setStatus(message, type = 'info') {
+      statusEl.textContent = message;
+      statusEl.className = '';
+      statusEl.classList.add(type === 'error' ? 'error' : type === 'success' ? 'success' : '');
+    }
+
+    async function registerUser(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const payload = Object.fromEntries(formData.entries());
+      try {
+        const res = await fetch(`${apiBase}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || '회원가입 실패');
+        setStatus('회원가입 완료! 잠시 후 로그인 페이지로 이동합니다.', 'success');
+        setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+      } catch (err) {
+        setStatus(err.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>
