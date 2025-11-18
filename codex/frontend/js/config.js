@@ -4,10 +4,14 @@
   const fromMeta = metaTag?.getAttribute('content');
 
   const inferOrigin = () => {
-    if (window.location.origin && window.location.origin !== 'null') {
+    const { protocol, hostname, port } = window.location;
+    const safeHost = hostname && hostname !== 'null' ? hostname : '127.0.0.1';
+    const sameOrigin = !port || port === '80' || port === '443' || port === '5000';
+    if (sameOrigin && window.location.origin && window.location.origin !== 'null') {
       return `${window.location.origin.replace(/\/$/, '')}/api`;
     }
-    return 'http://127.0.0.1:5000/api';
+    const inferredPort = '5000';
+    return `${protocol || 'http:'}//${safeHost}:${inferredPort}/api`;
   };
 
   const normalize = (value) => {

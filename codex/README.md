@@ -1,6 +1,20 @@
 # 미니 게시판 데모
 
-간단한 Flask 백엔드와 정적 HTML/JS 프론트엔드로 구성된 게시판 예제입니다. 회원가입/로그인, 글 CRUD, 댓글 및 대댓글을 제공합니다.
+간단한 Flask 백엔드와 정적 HTML/JS 프론트엔드로 구성된 게시판 예제입니다. 회원가입/로그인, 글 CRUD, 댓글 및 대댓글을 제공합니다. 로컬 개발 시 백엔드와 프런트엔드를 각각 실행한 뒤 브라우저에서 확인하면 됩니다.
+
+## 실행 빠른 가이드
+
+1. **백엔드**
+   ```bash
+   pip install -r backend/requirements.txt
+   python backend/app.py  # 또는 flask --app backend.app run
+   ```
+   환경변수(`DATABASE_URL`, `SECRET_KEY`, `FLASK_RUN_PORT` 등)는 필요 시 `.env`에 넣어두고 `python-dotenv`와 함께 사용할 수 있습니다.
+2. **프런트엔드**
+   ```bash
+   python -m http.server 3000 --directory frontend
+   ```
+   이후 브라우저에서 `http://127.0.0.1:3000/` 접속. 다른 포트에서 띄우면 `frontend/js/config.js`가 자동으로 `http://<host>:5000/api`를 바라봅니다. 백엔드와 다른 도메인을 사용할 때는 HTML에서 `window.__API_BASE__ = 'https://example.com/api'`를 `js/config.js`보다 먼저 선언하거나 `<meta name="api-base" ...>`를 추가해 주세요.
 
 ## Backend (Flask)
 
@@ -16,9 +30,20 @@
    ```
 3. 서버 실행:
    ```bash
-   flask --app app run
+   flask --app backend.app run  # 또는 python backend/app.py
    ```
-   (기본 포트 `5000`) 처음 실행 시 `backend/blog.db`가 자동 생성됩니다.
+   (기본 포트 `5000`) 처음 실행 시 `backend/instance/blog.db`가 자동 생성됩니다. `python backend/app.py`는 `HOST`, `PORT`, `FLASK_DEBUG` 환경변수를 자동으로 읽어 실행합니다.
+
+### 환경 변수
+
+| 이름 | 용도 | 기본값 |
+| --- | --- | --- |
+| `DATABASE_URL` | SQLAlchemy 연결 문자열 | `sqlite:///blog.db` |
+| `SECRET_KEY` | Flask 세션/보안 키 | `dev-secret-key` |
+| `CORS_ORIGINS` | 허용할 CORS 오리진 콤마 리스트 | 모든 오리진 허용 |
+| `FLASK_RUN_HOST`/`HOST` | 개발 서버 호스트 | `127.0.0.1` |
+| `FLASK_RUN_PORT`/`PORT` | 개발 서버 포트 | `5000` |
+| `FLASK_DEBUG`/`DEBUG` | 디버그 모드 on/off | `False` |
 
 ## Frontend
 
@@ -37,7 +62,16 @@ cd frontend
 python3 -m http.server 8080
 ```
 
-프론트 스크립트는 기본적으로 `http://127.0.0.1:5000/api`를 바라보므로, Flask 서버를 먼저 실행한 뒤 원하는 페이지를 브라우저에서 열어주세요.
+`frontend/js/config.js`가 프런트의 오리진을 기준으로 API 주소를 추론하며, 수동으로 바꾸고 싶다면 페이지 상단에 다음 스니펫을 넣습니다.
+
+```html
+<script>
+  window.__API_BASE__ = 'http://127.0.0.1:5000/api';
+</script>
+<script src="./js/config.js"></script>
+```
+
+혹은 `<meta name="api-base" content="https://api.example.com">`를 추가해도 됩니다. 항상 Flask 서버를 먼저 실행한 뒤 프런트 페이지를 열어주세요.
 
 ## 주요 API 요약
 
