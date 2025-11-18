@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from models import Post
+from models import Post, Comment
 
 posts_bp = Blueprint('posts', __name__)
 
@@ -25,7 +25,8 @@ def view_post(post_id):
         flash('존재하지 않는 글입니다.', 'error')
         return redirect(url_for('home'))
     
-    return render_template('post.html', post=post)
+    comments = Comment.get_by_post(post_id)
+    return render_template('post.html', post=post, comments=comments)
 
 @posts_bp.route('/edit/<int:post_id>', methods=['GET', 'POST'])
 def edit_post(post_id):

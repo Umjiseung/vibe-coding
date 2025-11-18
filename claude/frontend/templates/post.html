@@ -1,18 +1,104 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="post">
+    <article class="post-detail">
         <h2>{{ post.title }}</h2>
         <div class="post-meta">
-            작성자: {{ post.author }} | 작성일: {{ post.created_at }}
+            <span>{{ post.author }}</span>
+            <span>{{ post.created_at }}</span>
         </div>
-        <div class="post-content" style="white-space: pre-wrap; margin-top: 20px;">{{ post.content }}</div>
+        <div class="post-content">{{ post.content }}</div>
         {% if session.get('user') == post.author %}
             <div class="post-actions">
-                <a href="/edit/{{ post.id }}" class="btn-small btn-edit">수정</a>
-                <a href="/delete/{{ post.id }}" class="btn-small btn-delete" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</a>
+                <a href="/edit/{{ post.id }}" class="btn-small btn-edit">수정하기</a>
+                <a href="/delete/{{ post.id }}" class="btn-small btn-delete" onclick="return confirm('정말 삭제하시겠습니까?')">삭제하기</a>
             </div>
         {% endif %}
+    </article>
+
+    <!-- 댓글 섹션 -->
+    <div class="comment-section">
+        <h3 class="comment-title">댓글 {{ comments|length }}개</h3>
+        
+        <!-- 댓글 작성 폼 -->
+        {% if session.get('user') %}
+            <form method="POST" action="/comment/{{ post.id }}" class="comment-form">
+                <textarea name="content" placeholder="댓글을 입력하세요" required></textarea>
+                <button type="submit" class="btn-primary">댓글 작성</button>
+            </form>
+        {% else %}
+            <div class="comment-login-notice">
+                댓글을 작성하려면 <a href="/login">로그인</a>이 필요합니다.
+            </div>
+        {% endif %}
+
+        <!-- 댓글 목록 -->
+        <div class="comment-list">
+            {% for comment in comments %}
+                <div class="comment">
+                    <div class="comment-header">
+                        <span class="comment-author">{{ comment.author }}</span>
+                        <span class="comment-date">{{ comment.created_at }}</span>
+                    </div>
+                    <div class="comment-content">{{ comment.content }}</div>
+                    <div class="comment-actions">
+                        {% if session.get('user') %}
+                            <button class="btn-reply" onclick="toggleReplyForm({{ comment.id }})">답글</button>
+                        {% endif %}
+                        {% if session.get('user') == comment.author %}
+                            <a href="/comment/delete/{{ comment.id }}" class="btn-delete-comment" onclick="return confirm('댓글을 삭제하시겠습니까?')">삭제</a>
+                        {% endif %}
+                    </div>
+
+                    <!-- 답글 작성 폼 -->
+                    {% if session.get('user') %}
+                        <div class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;">
+                            <form method="POST" action="/comment/{{ post.id }}">
+                                <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                                <textarea name="content" placeholder="답글을 입력하세요" required></textarea>
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="submit" class="btn-primary" style="flex: 1;">답글 작성</button>
+                                    <button type="button" class="btn-cancel" onclick="toggleReplyForm({{ comment.id }})">취소</button>
+                                </div>
+                            </form>
+                        </div>
+                    {% endif %}
+
+                    <!-- 대댓글 목록 -->
+                    {% if comment.replies %}
+                        <div class="reply-list">
+                            {% for reply in comment.replies %}
+                                <div class="comment reply">
+                                    <div class="comment-header">
+                                        <span class="comment-author">{{ reply.author }}</span>
+                                        <span class="comment-date">{{ reply.created_at }}</span>
+                                    </div>
+                                    <div class="comment-content">{{ reply.content }}</div>
+                                    {% if session.get('user') == reply.author %}
+                                        <div class="comment-actions">
+                                            <a href="/comment/delete/{{ reply.id }}" class="btn-delete-comment" onclick="return confirm('댓글을 삭제하시겠습니까?')">삭제</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
     </div>
-    <a href="/" style="color: #667eea; text-decoration: none; display: inline-block; margin-top: 20px;">← 목록으로</a>
+
+    <a href="/" class="back-link">← 목록으로</a>
+
+    <script>
+    function toggleReplyForm(commentId) {
+        const replyForm = document.getElementById('reply-form-' + commentId);
+        if (replyForm.style.display === 'none') {
+            replyForm.style.display = 'block';
+            replyForm.querySelector('textarea').focus();
+        } else {
+            replyForm.style.display = 'none';
+        }
+    }
+    </script>
 {% endblock %}

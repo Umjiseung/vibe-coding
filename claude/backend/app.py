@@ -1,6 +1,7 @@
 from flask import Flask, render_template, session
 from routes.auth import auth_bp
 from routes.posts import posts_bp
+from routes.comments import comments_bp
 import secrets
 
 app = Flask(__name__, 
@@ -11,6 +12,7 @@ app.secret_key = secrets.token_hex(16)
 # 블루프린트 등록
 app.register_blueprint(auth_bp)
 app.register_blueprint(posts_bp)
+app.register_blueprint(comments_bp)
 
 @app.route('/')
 def home():

@@ -39,3 +39,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+function toggleReplyForm(commentId) {
+    const replyForm = document.getElementById('reply-form-' + commentId);
+    if (replyForm.style.display === 'none') {
+        replyForm.style.display = 'block';
+        replyForm.querySelector('textarea').focus();
+    } else {
+        replyForm.style.display = 'none';
+    }
+}
