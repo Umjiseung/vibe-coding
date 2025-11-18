@@ -58,6 +58,15 @@
 
 새로운 터미널을 열거나, 기존 터미널과 별개로 파일 탐색기를 사용합니다.
 
+```bash
+cd frontend
+python -m http.server
+```
+
+```bash
+http://localhost:8000
+```
+
 1.  **`frontend` 디렉토리의 `index.html` 파일을 웹 브라우저에서 엽니다.**
     가장 간단한 방법은 파일 탐색기에서 `/Users/eomjiseong/Desktop/vibe coding/gemini cli/frontend/index.html` 파일을 찾아 웹 브라우저(Chrome, Safari 등)로 드래그하는 것입니다.
 
