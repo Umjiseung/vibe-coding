@@ -2,14 +2,22 @@ import mysql.connector
 from mysql.connector import Error
 from datetime import datetime
 from contextlib import contextmanager
+import os
+from dotenv import load_dotenv
+
+# .env 파일 로드
+load_dotenv()
 
 # MySQL 연결 설정
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',  # MySQL 사용자명
-    'password': '12345',  # MySQL 비밀번호로 변경!
-    'database': 'blog_db'
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'port': int(os.getenv('DB_PORT', 3306)),
+    'user': os.getenv('DB_USER', 'root'),
+    'password': os.getenv('DB_PASSWORD', '12345'),
+    'database': os.getenv('DB_NAME', 'blog_db')
 }
+
+print(f"🔍 DB_PASSWORD from env: {os.getenv('DB_PASSWORD')}")
 
 @contextmanager
 def get_db_connection():
