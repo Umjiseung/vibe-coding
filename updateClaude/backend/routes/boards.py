@@ -7,7 +7,7 @@ boards_bp = Blueprint('boards', __name__)
 
 @boards_bp.route('', methods=['POST'])
 @jwt_required()
-def create_board():
+def create_board()
     user_id = get_jwt_identity()
     data = request.json
     

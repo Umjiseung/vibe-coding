@@ -126,4 +126,4 @@ dmypy.json
 # Database
 app.db
 
-backend/config.py
+backend/config.py 
