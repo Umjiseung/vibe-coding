@@ -36,3 +36,15 @@
     transform: rotate(360deg);
   }
 }
+
+/* Custom Navbar styles */
+.custom-navbar {
+  background-color: white !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.nav-link.active {
+  font-weight: bold;
+  color: #5c6ac4 !important;
+}

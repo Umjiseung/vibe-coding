@@ -17,7 +17,7 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
-    CORS(app)
+    CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]}}, supports_credentials=True)
     jwt.init_app(app)
     mail.init_app(app)
 

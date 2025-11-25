@@ -5,9 +5,77 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #f4f7f6;
+  color: #333;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Override Bootstrap styles */
+.btn {
+  border-radius: 8px !important;
+  padding: 10px 20px !important;
+  font-size: 16px !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-primary {
+  background-color: #5c6ac4 !important;
+  border-color: #5c6ac4 !important;
+}
+
+.btn-primary:hover {
+  background-color: #4a56a6 !important;
+  border-color: #4a56a6 !important;
+}
+
+.form-control {
+  border-radius: 8px !important;
+  padding: 12px !important;
+  font-size: 16px !important;
+}
+
+.form-control:focus {
+  border-color: #5c6ac4 !important;
+  box-shadow: 0 0 0 0.2rem rgba(92, 106, 196, 0.25) !important;
+}
+
+.card {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+  padding: 20px !important;
+  margin: 20px 0 !important;
+  border: none !important;
+}
+
+.alert {
+  border-radius: 8px !important;
+  padding: 15px !important;
+}
+
+.table {
+  margin-top: 20px;
+}
+
+.table th, .table td {
+  padding: 12px;
+  vertical-align: middle;
+}
+
+.table thead th {
+  border-bottom: 2px solid #dee2e6;
+}
+
+a {
+  color: #5c6ac4;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #4a56a6;
+  text-decoration: none;
 }

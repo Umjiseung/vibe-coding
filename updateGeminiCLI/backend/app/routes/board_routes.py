@@ -36,13 +36,19 @@ def create_board():
 
 @bp.route('/', methods=['GET'])
 def get_boards():
-    boards = Board.query.all()
+    category = request.args.get('category')
+    if category:
+        boards = Board.query.filter_by(category=category).all()
+    else:
+        boards = Board.query.all()
+        
     output = []
     for board in boards:
         board_data = {
             'board_id': board.board_id,
             'title': board.title,
             'content': board.content,
+            'category': board.category,
             'created_at': board.created_at,
             'author': board.author.nickname,
             'like_count': board.like_count,
@@ -62,6 +68,7 @@ def get_board(board_id):
         'board_id': board.board_id,
         'title': board.title,
         'content': board.content,
+        'category': board.category,
         'created_at': board.created_at,
         'author': board.author.nickname,
         'like_count': board.like_count,

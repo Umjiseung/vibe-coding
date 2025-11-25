@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 
 function Header() {
@@ -12,32 +12,32 @@ function Header() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light">
+    <nav className="navbar navbar-expand-lg navbar-light custom-navbar">
       <div className="container">
-        <Link className="navbar-brand" to="/">Blog</Link>
+        <NavLink className="navbar-brand" to="/">Blog</NavLink>
         <div className="collapse navbar-collapse">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <Link className="nav-link" to="/boards">Boards</Link>
+              <NavLink className="nav-link" to="/boards">Boards</NavLink>
             </li>
           </ul>
           <ul className="navbar-nav">
             {user ? (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/profile">{user.nickname}</Link>
+                  <NavLink className="nav-link" to="/profile">{user.nickname}</NavLink>
                 </li>
                 <li className="nav-item">
-                  <button className="btn btn-link nav-link" onClick={handleLogout}>Logout</button>
+                  <button className="btn btn-outline-primary" onClick={handleLogout}>Logout</button>
                 </li>
               </>
             ) : (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/login">Login</Link>
+                  <NavLink className="nav-link" to="/login">Login</NavLink>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/register">Register</Link>
+                  <NavLink className="nav-link" to="/register">Register</NavLink>
                 </li>
               </>
             )}

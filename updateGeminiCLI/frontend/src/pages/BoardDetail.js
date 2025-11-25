@@ -16,7 +16,7 @@ function BoardDetail() {
       const response = await axios.get(`/boards/${boardId}`);
       setBoard(response.data.board);
     } catch (err) {
-      setError('Failed to fetch board details.');
+      setError(err.response?.data?.error || 'Failed to fetch board details. Is the backend server running?');
     }
   };
 
@@ -31,7 +31,7 @@ function BoardDetail() {
       setNewComment('');
       fetchBoard(); // Re-fetch to show the new comment
     } catch (err) {
-      setError('Failed to post comment.');
+      setError(err.response?.data?.error || 'Failed to post comment. Is the backend server running?');
     }
   };
   
@@ -40,7 +40,7 @@ function BoardDetail() {
       await axios.delete(`/boards/${boardId}`);
       navigate('/boards');
     } catch (err) {
-      setError('Failed to delete board.');
+      setError(err.response?.data?.error || 'Failed to delete board. Is the backend server running?');
     }
   };
 
@@ -62,37 +62,52 @@ function BoardDetail() {
   if (!board) return <div>Loading...</div>;
 
   return (
-    <div>
-      <div className="d-flex justify-content-between align-items-center">
-        <h2>{board.title}</h2>
-        {user && user.user_id === board.author_id && (
-          <div>
-            <button onClick={() => navigate(`/boards/${boardId}/edit`)} className="btn btn-secondary me-2">Edit</button>
-            <button onClick={handleDelete} className="btn btn-danger">Delete</button>
+    <div className="container mt-4">
+      <div className="card">
+        <div className="card-body">
+          <div className="d-flex justify-content-between align-items-center">
+            <h2 className="card-title">{board.title}</h2>
+            {user && user.user_id === board.author_id && (
+              <div>
+                <button onClick={() => navigate(`/boards/${boardId}/edit`)} className="btn btn-secondary me-2">Edit</button>
+                <button onClick={handleDelete} className="btn btn-danger">Delete</button>
+              </div>
+            )}
           </div>
-        )}
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <p className="card-subtitle text-muted mb-0">
+              by {board.author} on {new Date(board.created_at).toLocaleDateString()}
+            </p>
+            {board.category && <span className="badge bg-secondary">{board.category}</span>}
+          </div>
+          <hr />
+          <p className="card-text">{board.content}</p>
+        </div>
       </div>
-      <p>by {board.author} on {new Date(board.created_at).toLocaleDateString()}</p>
-      <hr />
-      <p>{board.content}</p>
-      <hr />
-      <h3>Comments</h3>
-      {board.comments.length > 0 ? renderComments(board.comments) : <p>No comments yet.</p>}
+
+      <div className="mt-4">
+        <h3>Comments</h3>
+        {board.comments.length > 0 ? renderComments(board.comments) : <p>No comments yet.</p>}
+      </div>
 
       {user && (
-        <form onSubmit={handleCommentSubmit} className="mt-4">
-          <h4>Leave a Comment</h4>
-          <div className="mb-3">
-            <textarea
-              className="form-control"
-              rows="3"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              required
-            ></textarea>
+        <div className="card mt-4">
+          <div className="card-body">
+            <h4 className="card-title">Leave a Comment</h4>
+            <form onSubmit={handleCommentSubmit}>
+              <div className="mb-3">
+                <textarea
+                  className="form-control"
+                  rows="3"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  required
+                ></textarea>
+              </div>
+              <button type="submit" className="btn btn-primary">Submit</button>
+            </form>
           </div>
-          <button type="submit" className="btn btn-primary">Submit</button>
-        </form>
+        </div>
       )}
     </div>
   );
