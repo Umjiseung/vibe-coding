@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from extensions import db, mail
 from models import User
-from passlib.hash import bcrypt
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
 from datetime import datetime, timedelta
 from flask_mail import Message
@@ -22,7 +22,7 @@ def register():
     if User.query.filter_by(email=email).first():
         return jsonify({'msg': 'email exists'}), 400
 
-    hashed = bcrypt.hash(password)
+    hashed = generate_password_hash(password)
     user = User(email=email, nickname=nickname, password=hashed)
     db.session.add(user)
     db.session.commit()
@@ -37,10 +37,10 @@ def login():
     if not (email and password):
         return jsonify({'msg': 'missing'}), 400
     user = User.query.filter_by(email=email).first()
-    if not user or not bcrypt.verify(password, user.password):
+    if not user or not check_password_hash(user.password, password):
         return jsonify({'msg': 'invalid credentials'}), 401
 
-    token = create_access_token(identity=user.user_id)
+    token = create_access_token(identity=str(user.user_id))
     return jsonify({'access_token': token, 'user': {'user_id': user.user_id, 'email': user.email, 'nickname': user.nickname}})
 
 
@@ -81,7 +81,7 @@ def reset_password():
         return jsonify({'msg': 'invalid token'}), 400
     if user.reset_token_expires is None or user.reset_token_expires < datetime.utcnow():
         return jsonify({'msg': 'token expired'}), 400
-    user.password = bcrypt.hash(new_password)
+    user.password = generate_password_hash(new_password)
     user.reset_token = None
     user.reset_token_expires = None
     db.session.commit()

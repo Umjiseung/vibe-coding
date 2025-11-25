@@ -43,15 +43,6 @@ export async function getBoard(board_id) {
   return res.json()
 }
 
-export async function toggleLike(payload) {
-  const res = await fetch(`${BASE}/likes/toggle`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body: JSON.stringify(payload),
-  })
-  return res.json()
-}
-
 export async function getMe() {
   const res = await fetch(`${BASE}/users/me`, { headers: { ...authHeaders() } })
   if (!res.ok) return null
@@ -67,3 +58,27 @@ export async function createComment(board_id, content, parent_comment) {
   return res.json()
 }
 
+export async function toggleLike(board_id, comment_id) {
+  const payload = {}
+  if (board_id) payload.board_id = board_id
+  if (comment_id) payload.comment_id = comment_id
+  
+  const res = await fetch(`${BASE}/likes/toggle`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(payload),
+  })
+  return res.json()
+}
+
+export async function checkLike(board_id, comment_id) {
+  const params = new URLSearchParams()
+  if (board_id) params.append('board_id', board_id)
+  if (comment_id) params.append('comment_id', comment_id)
+  
+  const res = await fetch(`${BASE}/likes/check?${params.toString()}`, {
+    headers: { ...authHeaders() },
+  })
+  if (!res.ok) return { liked: false }
+  return res.json()
+}

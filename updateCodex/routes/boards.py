@@ -9,7 +9,7 @@ boards_bp = Blueprint('boards', __name__)
 @boards_bp.route('/', methods=['POST'])
 @jwt_required()
 def create_board():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     data = request.get_json() or {}
     title = data.get('title')
     content = data.get('content')
@@ -63,7 +63,7 @@ def get_board(board_id):
 @boards_bp.route('/<int:board_id>', methods=['PUT'])
 @jwt_required()
 def update_board(board_id):
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     b = Board.query.get_or_404(board_id)
     if b.user_id != user_id:
         return jsonify({'msg': 'forbidden'}), 403
@@ -78,7 +78,7 @@ def update_board(board_id):
 @boards_bp.route('/<int:board_id>', methods=['DELETE'])
 @jwt_required()
 def delete_board(board_id):
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     b = Board.query.get_or_404(board_id)
     if b.user_id != user_id:
         return jsonify({'msg': 'forbidden'}), 403

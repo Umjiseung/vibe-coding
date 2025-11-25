@@ -7,10 +7,24 @@ from datetime import datetime
 likes_bp = Blueprint('likes', __name__)
 
 
+@likes_bp.route('/check', methods=['GET'])
+@jwt_required()
+def check_like():
+    user_id = int(get_jwt_identity())
+    board_id = request.args.get('board_id', type=int)
+    comment_id = request.args.get('comment_id', type=int)
+    
+    if not (board_id or comment_id):
+        return jsonify({'msg': 'provide board_id or comment_id'}), 400
+    
+    liked = Like.query.filter_by(user_id=user_id, board_id=board_id, comment_id=comment_id).first() is not None
+    return jsonify({'liked': liked})
+
+
 @likes_bp.route('/toggle', methods=['POST'])
 @jwt_required()
 def toggle_like():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     data = request.get_json() or {}
     board_id = data.get('board_id')
     comment_id = data.get('comment_id')

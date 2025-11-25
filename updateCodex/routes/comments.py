@@ -9,7 +9,7 @@ comments_bp = Blueprint('comments', __name__)
 @comments_bp.route('/', methods=['POST'])
 @jwt_required()
 def create_comment():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     data = request.get_json() or {}
     board_id = data.get('board_id')
     content = data.get('content')
