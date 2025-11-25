@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const CATEGORIES = [
-  'Technology',
-  'Science',
-  'Art',
-  'Lifestyle',
-  'Sports',
-  'News',
-  'Other',
+  '기술',
+  '과학',
+  '예술',
+  '라이프스타일',
+  '스포츠',
+  '뉴스',
+  '기타',
 ];
 
 function CreateBoard() {
@@ -25,7 +25,7 @@ function CreateBoard() {
       await axios.post('/boards/', { title, content, category });
       navigate('/boards');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create board. Is the backend server running?');
+      setError(err.response?.data?.error || '게시판을 만드는 데 실패했습니다. 백엔드 서버가 실행 중입니까?');
     }
   };
 
@@ -33,11 +33,11 @@ function CreateBoard() {
     <div className="container mt-4">
       <div className="card">
         <div className="card-body">
-          <h2 className="card-title">Create Board</h2>
+          <h2 className="card-title">게시판 생성</h2>
           {error && <div className="alert alert-danger mt-3">{error}</div>}
           <form onSubmit={handleSubmit} className="mt-4">
             <div className="mb-3">
-              <label className="form-label">Title</label>
+              <label className="form-label">제목</label>
               <input
                 type="text"
                 className="form-control"
@@ -47,7 +47,7 @@ function CreateBoard() {
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Category</label>
+              <label className="form-label">카테고리</label>
               <select
                 className="form-select" // Use form-select for Bootstrap 5 styled select
                 value={category}
@@ -61,7 +61,7 @@ function CreateBoard() {
               </select>
             </div>
             <div className="mb-3">
-              <label className="form-label">Content</label>
+              <label className="form-label">내용</label>
               <textarea
                 className="form-control"
                 rows="5"
@@ -70,7 +70,7 @@ function CreateBoard() {
                 required
               ></textarea>
             </div>
-            <button type="submit" className="btn btn-primary">Create</button>
+            <button type="submit" className="btn btn-primary">생성</button>
           </form>
         </div>
       </div>

@@ -17,7 +17,7 @@ function Login() {
       login(response.data.access_token);
       navigate('/profile');
     } catch (err) {
-      setError(err.response?.data?.error || 'Invalid email or password. Is the backend server running?');
+      setError(err.response?.data?.error || '잘못된 이메일 또는 비밀번호입니다. 백엔드 서버가 실행 중입니까?');
     }
   };
 
@@ -27,11 +27,11 @@ function Login() {
         <div className="col-md-6">
           <div className="card">
             <div className="card-body">
-              <h2 className="card-title text-center">Login</h2>
+              <h2 className="card-title text-center">로그인</h2>
               {error && <div className="alert alert-danger mt-3">{error}</div>}
               <form onSubmit={handleSubmit} className="mt-4">
                 <div className="mb-3">
-                  <label className="form-label">Email address</label>
+                  <label className="form-label">이메일 주소</label>
                   <input
                     type="email"
                     className="form-control"
@@ -41,7 +41,7 @@ function Login() {
                   />
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Password</label>
+                  <label className="form-label">비밀번호</label>
                   <input
                     type="password"
                     className="form-control"
@@ -51,14 +51,14 @@ function Login() {
                   />
                 </div>
                 <div className="d-grid">
-                  <button type="submit" className="btn btn-primary">Login</button>
+                  <button type="submit" className="btn btn-primary">로그인</button>
                 </div>
               </form>
               <p className="mt-3 text-center">
-                <Link to="/forgot-password">Forgot Password?</Link>
+                <Link to="/forgot-password">비밀번호를 잊으셨습니까?</Link>
               </p>
               <p className="mt-3 text-center">
-                Don't have an account? <Link to="/register">Register</Link>
+                계정이 없으신가요? <Link to="/register">회원가입</Link>
               </p>
             </div>
           </div>

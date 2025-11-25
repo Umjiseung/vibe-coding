@@ -1,23 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import AuthContext from '../context/AuthContext';
 
 const CATEGORIES = [
-  'Technology',
-  'Science',
-  'Art',
-  'Lifestyle',
-  'Sports',
-  'News',
-  'Other',
+  '기술',
+  '과학',
+  '예술',
+  '라이프스타일',
+  '스포츠',
+  '뉴스',
+  '기타',
 ];
 
 function BoardList() {
   const [boards, setBoards] = useState([]);
   const [error, setError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
     const fetchBoards = async () => {
       try {
         const url = selectedCategory === 'All' 
@@ -26,28 +34,28 @@ function BoardList() {
         const response = await axios.get(url);
         setBoards(response.data.boards);
       } catch (err) {
-        setError(err.response?.data?.error || 'Failed to fetch boards. Is the backend server running?');
+        setError(err.response?.data?.error || '게시판을 가져오는 데 실패했습니다. 백엔드 서버가 실행 중입니까?');
       }
     };
     fetchBoards();
-  }, [selectedCategory]);
+  }, [selectedCategory, user, navigate]);
 
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Boards</h2>
-        <Link to="/boards/create" className="btn btn-primary">Create Board</Link>
+        <h2>게시판</h2>
+        <Link to="/boards/create" className="btn btn-primary">게시판 생성</Link>
       </div>
 
       <div className="mb-4">
-        <label htmlFor="category-filter" className="form-label">Filter by Category:</label>
+        <label htmlFor="category-filter" className="form-label">카테고리별 필터:</label>
         <select 
           id="category-filter" 
           className="form-select" 
           value={selectedCategory} 
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
-          <option value="All">All</option>
+          <option value="All">전체</option>
           {CATEGORIES.map((cat) => (
             <option key={cat} value={cat}>
               {cat}
@@ -72,7 +80,7 @@ function BoardList() {
                 {board.category && <span className="badge bg-secondary">{board.category}</span>}
               </div>
               <hr/>
-              <small className="text-muted">Likes: {board.like_count} | Comments: {board.comment_count}</small>
+              <small className="text-muted">좋아요: {board.like_count} | 댓글: {board.comment_count}</small>
             </div>
           </div>
         ))}

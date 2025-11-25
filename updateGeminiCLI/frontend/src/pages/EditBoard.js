@@ -3,13 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const CATEGORIES = [
-  'Technology',
-  'Science',
-  'Art',
-  'Lifestyle',
-  'Sports',
-  'News',
-  'Other',
+  '기술',
+  '과학',
+  '예술',
+  '라이프스타일',
+  '스포츠',
+  '뉴스',
+  '기타',
 ];
 
 function EditBoard() {
@@ -29,7 +29,7 @@ function EditBoard() {
         setContent(content);
         setCategory(category || CATEGORIES[0]); // Set initial category, default to first if none
       } catch (err) {
-        setError(err.response?.data?.error || 'Failed to fetch board data. Is the backend server running?');
+        setError(err.response?.data?.error || '게시판 데이터를 가져오는 데 실패했습니다. 백엔드 서버가 실행 중입니까?');
       }
     };
     fetchBoard();
@@ -41,7 +41,7 @@ function EditBoard() {
       await axios.put(`/boards/${boardId}`, { title, content, category });
       navigate(`/boards/${boardId}`);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update board. Is the backend server running?');
+      setError(err.response?.data?.error || '게시판을 업데이트하는 데 실패했습니다. 백엔드 서버가 실행 중입니까?');
     }
   };
 
@@ -49,11 +49,11 @@ function EditBoard() {
     <div className="container mt-4">
       <div className="card">
         <div className="card-body">
-          <h2 className="card-title">Edit Board</h2>
+          <h2 className="card-title">게시판 수정</h2>
           {error && <div className="alert alert-danger mt-3">{error}</div>}
           <form onSubmit={handleSubmit} className="mt-4">
             <div className="mb-3">
-              <label className="form-label">Title</label>
+              <label className="form-label">제목</label>
               <input
                 type="text"
                 className="form-control"
@@ -63,7 +63,7 @@ function EditBoard() {
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Category</label>
+              <label className="form-label">카테고리</label>
               <select
                 className="form-select" // Use form-select for Bootstrap 5 styled select
                 value={category}
@@ -77,7 +77,7 @@ function EditBoard() {
               </select>
             </div>
             <div className="mb-3">
-              <label className="form-label">Content</label>
+              <label className="form-label">내용</label>
               <textarea
                 className="form-control"
                 rows="5"
@@ -86,7 +86,7 @@ function EditBoard() {
                 required
               ></textarea>
             </div>
-            <button type="submit" className="btn btn-primary">Update</button>
+            <button type="submit" className="btn btn-primary">업데이트</button>
           </form>
         </div>
       </div>

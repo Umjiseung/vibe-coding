@@ -16,13 +16,17 @@ function BoardDetail() {
       const response = await axios.get(`/boards/${boardId}`);
       setBoard(response.data.board);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to fetch board details. Is the backend server running?');
+      setError(err.response?.data?.error || '게시판 세부 정보를 가져오는 데 실패했습니다. 백엔드 서버가 실행 중입니까?');
     }
   };
 
   useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     fetchBoard();
-  }, [boardId]);
+  }, [boardId, user, navigate]);
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
@@ -31,7 +35,7 @@ function BoardDetail() {
       setNewComment('');
       fetchBoard(); // Re-fetch to show the new comment
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to post comment. Is the backend server running?');
+      setError(err.response?.data?.error || '댓글을 게시하는 데 실패했습니다. 백엔드 서버가 실행 중입니까?');
     }
   };
   
@@ -40,7 +44,7 @@ function BoardDetail() {
       await axios.delete(`/boards/${boardId}`);
       navigate('/boards');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to delete board. Is the backend server running?');
+      setError(err.response?.data?.error || '게시판을 삭제하는 데 실패했습니다. 백엔드 서버가 실행 중입니까?');
     }
   };
 
@@ -59,7 +63,7 @@ function BoardDetail() {
   };
   
   if (error) return <div className="alert alert-danger">{error}</div>;
-  if (!board) return <div>Loading...</div>;
+  if (!board) return <div>로딩 중...</div>;
 
   return (
     <div className="container mt-4">
@@ -69,8 +73,8 @@ function BoardDetail() {
             <h2 className="card-title">{board.title}</h2>
             {user && user.user_id === board.author_id && (
               <div>
-                <button onClick={() => navigate(`/boards/${boardId}/edit`)} className="btn btn-secondary me-2">Edit</button>
-                <button onClick={handleDelete} className="btn btn-danger">Delete</button>
+                <button onClick={() => navigate(`/boards/${boardId}/edit`)} className="btn btn-secondary me-2">수정</button>
+                <button onClick={handleDelete} className="btn btn-danger">삭제</button>
               </div>
             )}
           </div>
@@ -86,14 +90,14 @@ function BoardDetail() {
       </div>
 
       <div className="mt-4">
-        <h3>Comments</h3>
-        {board.comments.length > 0 ? renderComments(board.comments) : <p>No comments yet.</p>}
+        <h3>댓글</h3>
+        {board.comments.length > 0 ? renderComments(board.comments) : <p>아직 댓글이 없습니다.</p>}
       </div>
 
       {user && (
         <div className="card mt-4">
           <div className="card-body">
-            <h4 className="card-title">Leave a Comment</h4>
+            <h4 className="card-title">댓글 남기기</h4>
             <form onSubmit={handleCommentSubmit}>
               <div className="mb-3">
                 <textarea
@@ -104,7 +108,7 @@ function BoardDetail() {
                   required
                 ></textarea>
               </div>
-              <button type="submit" className="btn btn-primary">Submit</button>
+              <button type="submit" className="btn btn-primary">제출</button>
             </form>
           </div>
         </div>

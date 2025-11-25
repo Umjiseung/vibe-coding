@@ -14,19 +14,19 @@ function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!token) {
-      setError('Invalid reset link. No token found.');
+      setError('유효하지 않은 재설정 링크입니다. 토큰을 찾을 수 없습니다.');
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError('비밀번호가 일치하지 않습니다');
       return;
     }
     try {
       await axios.post('/auth/reset-password', { token, password });
-      setMessage('Password reset successfully! You can now log in.');
+      setMessage('비밀번호가 성공적으로 재설정되었습니다! 이제 로그인할 수 있습니다.');
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to reset password. Is the backend server running?');
+      setError(err.response?.data?.error || '비밀번호 재설정에 실패했습니다. 백엔드 서버가 실행 중입니까?');
     }
   };
 
@@ -36,12 +36,12 @@ function ResetPassword() {
         <div className="col-md-6">
           <div className="card">
             <div className="card-body">
-              <h2 className="card-title text-center">Reset Password</h2>
+              <h2 className="card-title text-center">비밀번호 재설정</h2>
               {error && <div className="alert alert-danger mt-3">{error}</div>}
               {message && <div className="alert alert-success mt-3">{message}</div>}
               <form onSubmit={handleSubmit} className="mt-4">
                 <div className="mb-3">
-                  <label className="form-label">New Password</label>
+                  <label className="form-label">새 비밀번호</label>
                   <input
                     type="password"
                     className="form-control"
@@ -51,7 +51,7 @@ function ResetPassword() {
                   />
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Confirm New Password</label>
+                  <label className="form-label">새 비밀번호 확인</label>
                   <input
                     type="password"
                     className="form-control"
@@ -61,7 +61,7 @@ function ResetPassword() {
                   />
                 </div>
                 <div className="d-grid">
-                  <button type="submit" className="btn btn-primary">Reset Password</button>
+                  <button type="submit" className="btn btn-primary">비밀번호 재설정</button>
                 </div>
               </form>
             </div>
