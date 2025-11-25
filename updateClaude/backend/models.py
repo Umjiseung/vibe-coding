@@ -3,9 +3,12 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
+# 카테고리 정의
+CATEGORIES = ['일상', '기술', '여행', '음식', '취미', '기타']
+
 class User(db.Model):
     __tablename__ = 'user'
-    user_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.BigInteger, primary_key=True)
     email = db.Column(db.String(30), nullable=False, unique=True)
     nickname = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(200), nullable=False)
@@ -27,7 +30,7 @@ class Board(db.Model):
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     comment_count = db.Column(db.Integer, default=0)
     like_count = db.Column(db.Integer, default=0)
-    category = db.Column(db.String(20), nullable=True)
+    category = db.Column(db.String(20), nullable=False, default='기타')  # NOT NULL로 변경
     
     comments = db.relationship('Comment', backref='board', lazy=True, cascade='all, delete-orphan')
     likes = db.relationship('Like', backref='board', lazy=True, cascade='all, delete-orphan')

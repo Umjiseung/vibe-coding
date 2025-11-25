@@ -7,6 +7,8 @@ function BoardDetail({ boardId, currentUser, onBack, onEdit }) {
   const [board, setBoard] = useState(null);
   const [comment, setComment] = useState('');
   const [replyTo, setReplyTo] = useState(null);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
 
   useEffect(() => {
     loadBoard();
@@ -16,6 +18,8 @@ function BoardDetail({ boardId, currentUser, onBack, onEdit }) {
     try {
       const data = await api.request(`/boards/${boardId}`);
       setBoard(data);
+      setLikeCount(data.like_count);
+      setIsLiked(data.is_liked || false);  // 서버에서 받은 좋아요 상태 설정
     } catch (error) {
       alert(error.message);
     }
@@ -23,8 +27,18 @@ function BoardDetail({ boardId, currentUser, onBack, onEdit }) {
 
   const handleLike = async () => {
     try {
-      await api.request(`/likes/board/${boardId}`, { method: 'POST' });
-      loadBoard();
+      const response = await api.request(`/likes/board/${boardId}`, { 
+        method: 'POST' 
+      });
+      
+      // 좋아요 상태 토글
+      if (response.liked) {
+        setIsLiked(true);
+        setLikeCount(prev => prev + 1);
+      } else {
+        setIsLiked(false);
+        setLikeCount(prev => prev - 1);
+      }
     } catch (error) {
       alert(error.message);
     }
@@ -102,10 +116,17 @@ function BoardDetail({ boardId, currentUser, onBack, onEdit }) {
         
         <button
           onClick={handleLike}
-          className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition"
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+            isLiked 
+              ? 'bg-red-500 text-white hover:bg-red-600' 
+              : 'bg-red-50 text-red-500 hover:bg-red-100'
+          }`}
         >
-          <Heart className="w-5 h-5" />
-          좋아요 {board.like_count}
+          <Heart 
+            className="w-5 h-5" 
+            fill={isLiked ? 'currentColor' : 'none'}
+          />
+          좋아요 {likeCount}
         </button>
       </div>
       
@@ -147,6 +168,8 @@ function BoardDetail({ boardId, currentUser, onBack, onEdit }) {
               key={comment.comment_id} 
               comment={comment} 
               onReply={setReplyTo}
+              onUpdate={loadBoard}
+              currentUserId={currentUser?.user_id}
             />
           ))}
         </div>
